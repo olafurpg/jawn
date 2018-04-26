@@ -3,29 +3,30 @@ package jawn
 import scala.annotation.{switch, tailrec}
 
 /**
- * Trait used when the data to be parsed is in UTF-8.
- *
- * This parser has to translate input bytes to Chars and Strings. It
- * provides a byte() method to access individual bytes, and also
- * parser strings from bytes.
- *
- * Its parseString() implementation has two cases. In the first case
- * (the hot path) the string has no escape sequences and we can just
- * UTF-8 decode the entire set of bytes. In the second case, it goes
- * to some trouble to be sure to de-escape correctly given that the
- * input data is UTF-8.
- */
+  * Trait used when the data to be parsed is in UTF-8.
+  *
+  * This parser has to translate input bytes to Chars and Strings. It
+  * provides a byte() method to access individual bytes, and also
+  * parser strings from bytes.
+  *
+  * Its parseString() implementation has two cases. In the first case
+  * (the hot path) the string has no escape sequences and we can just
+  * UTF-8 decode the entire set of bytes. In the second case, it goes
+  * to some trouble to be sure to de-escape correctly given that the
+  * input data is UTF-8.
+  */
 trait ByteBasedParser[J] extends Parser[J] {
   protected[this] def byte(i: Int): Byte
 
   /**
-   * See if the string has any escape sequences. If not, return the end of the
-   * string. If so, bail out and return -1.
-   *
-   * This method expects the data to be in UTF-8 and accesses it as bytes. Thus
-   * we can just ignore any bytes with the highest bit set.
-   */
-  protected[this] final def parseStringSimple(i: Int, ctxt: RawFContext[J]): Int = {
+    * See if the string has any escape sequences. If not, return the end of the
+    * string. If so, bail out and return -1.
+    *
+    * This method expects the data to be in UTF-8 and accesses it as bytes. Thus
+    * we can just ignore any bytes with the highest bit set.
+    */
+  protected[this] final def parseStringSimple(i: Int,
+                                              ctxt: RawFContext[J]): Int = {
     var j = i
     var c: Int = byte(j) & 0xff
     while (c != 34) {
@@ -38,10 +39,10 @@ trait ByteBasedParser[J] extends Parser[J] {
   }
 
   /**
-   * Parse the string according to JSON rules, and add to the given context.
-   *
-   * This method expects the data to be in UTF-8 and accesses it as bytes.
-   */
+    * Parse the string according to JSON rules, and add to the given context.
+    *
+    * This method expects the data to be in UTF-8 and accesses it as bytes.
+    */
   protected[this] final def parseString(i: Int, ctxt: RawFContext[J]): Int = {
     val k = parseStringSimple(i + 1, ctxt)
     if (k != -1) {
@@ -60,7 +61,7 @@ trait ByteBasedParser[J] extends Parser[J] {
     while (c != 34) { // "
       if (c == 92) { // \
         (byte(j + 1): @switch) match {
-          case 98 => { sb.append('\b'); j += 2 }
+          case 98  => { sb.append('\b'); j += 2 }
           case 102 => { sb.append('\f'); j += 2 }
           case 110 => { sb.append('\n'); j += 2 }
           case 114 => { sb.append('\r'); j += 2 }

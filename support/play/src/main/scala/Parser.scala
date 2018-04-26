@@ -11,7 +11,8 @@ object Parser extends SupportParser[JsValue] {
       def jfalse() = JsBoolean(false)
       def jtrue() = JsBoolean(true)
 
-      def jnum(s: CharSequence, decIndex: Int, expIndex: Int) = JsNumber(BigDecimal(s.toString))
+      def jnum(s: CharSequence, decIndex: Int, expIndex: Int) =
+        JsNumber(BigDecimal(s.toString))
       def jstring(s: CharSequence) = JsString(s.toString)
 
       def jarray(vs: List[JsValue]) = JsArray(vs)

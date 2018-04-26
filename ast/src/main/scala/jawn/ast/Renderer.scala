@@ -14,23 +14,26 @@ sealed trait Renderer {
 
   final def render(sb: StringBuilder, depth: Int, jv: JValue): Unit =
     jv match {
-      case JNull => sb.append("null")
-      case JTrue => sb.append("true")
-      case JFalse => sb.append("false")
-      case LongNum(n) => sb.append(n.toString)
+      case JNull        => sb.append("null")
+      case JTrue        => sb.append("true")
+      case JFalse       => sb.append("false")
+      case LongNum(n)   => sb.append(n.toString)
       case DoubleNum(n) => sb.append(n.toString)
-      case DeferNum(s) => sb.append(s)
+      case DeferNum(s)  => sb.append(s)
       case DeferLong(s) => sb.append(s)
-      case JString(s) => renderString(sb, s)
-      case JArray(vs) => renderArray(sb, depth, vs)
-      case JObject(vs) => renderObject(sb, depth, canonicalizeObject(vs))
+      case JString(s)   => renderString(sb, s)
+      case JArray(vs)   => renderArray(sb, depth, vs)
+      case JObject(vs)  => renderObject(sb, depth, canonicalizeObject(vs))
     }
 
-  def canonicalizeObject(vs: mutable.Map[String, JValue]): Iterator[(String, JValue)]
+  def canonicalizeObject(
+      vs: mutable.Map[String, JValue]): Iterator[(String, JValue)]
 
   def renderString(sb: StringBuilder, s: String): Unit
 
-  final def renderArray(sb: StringBuilder, depth: Int, vs: Array[JValue]): Unit = {
+  final def renderArray(sb: StringBuilder,
+                        depth: Int,
+                        vs: Array[JValue]): Unit = {
     if (vs.isEmpty) return { sb.append("[]"); () }
     sb.append("[")
     render(sb, depth + 1, vs(0))
@@ -43,7 +46,9 @@ sealed trait Renderer {
     sb.append("]")
   }
 
-  final def renderObject(sb: StringBuilder, depth: Int, it: Iterator[(String, JValue)]): Unit = {
+  final def renderObject(sb: StringBuilder,
+                         depth: Int,
+                         it: Iterator[(String, JValue)]): Unit = {
     if (!it.hasNext) return { sb.append("{}"); () }
     val (k0, v0) = it.next
     sb.append("{")
@@ -66,7 +71,7 @@ sealed trait Renderer {
     val len = s.length
     while (i < len) {
       (s.charAt(i): @switch) match {
-        case '"' => sb.append("\\\"")
+        case '"'  => sb.append("\\\"")
         case '\\' => sb.append("\\\\")
         case '\b' => sb.append("\\b")
         case '\f' => sb.append("\\f")
@@ -74,7 +79,8 @@ sealed trait Renderer {
         case '\r' => sb.append("\\r")
         case '\t' => sb.append("\\t")
         case c =>
-          if (c < ' ' || (c > '~' && unicode)) sb.append("\\u%04x" format c.toInt)
+          if (c < ' ' || (c > '~' && unicode))
+            sb.append("\\u%04x" format c.toInt)
           else sb.append(c)
       }
       i += 1
@@ -84,7 +90,8 @@ sealed trait Renderer {
 }
 
 object CanonicalRenderer extends Renderer {
-  def canonicalizeObject(vs: mutable.Map[String, JValue]): Iterator[(String, JValue)] = {
+  def canonicalizeObject(
+      vs: mutable.Map[String, JValue]): Iterator[(String, JValue)] = {
     val keys = vs.keys.toArray
     Sorting.quickSort(keys)
     keys.iterator.map(k => (k, vs(k)))
@@ -94,7 +101,8 @@ object CanonicalRenderer extends Renderer {
 }
 
 object FastRenderer extends Renderer {
-  def canonicalizeObject(vs: mutable.Map[String, JValue]): Iterator[(String, JValue)] =
+  def canonicalizeObject(
+      vs: mutable.Map[String, JValue]): Iterator[(String, JValue)] =
     vs.iterator
   def renderString(sb: StringBuilder, s: String): Unit =
     escape(sb, s, false)

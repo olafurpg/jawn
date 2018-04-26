@@ -33,7 +33,7 @@ class ParserSpec extends FlatSpec with Matchers with Checkers {
       val jsonString: String = exampleCodecJson.encode(e).nospaces
       val json: Try[Json] = jawn.Parser.parseFromString(jsonString)
       exampleCodecJson.decodeJson(json.get).toOption match {
-        case None => fail()
+        case None          => fail()
         case Some(example) => example == e
       }
     }

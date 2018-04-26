@@ -20,7 +20,9 @@ class SliceCheck extends PropSpec with Matchers with PropertyChecks {
       g.map(Slice(_)),
       for { s <- g; n = s.length; i <- c(0, n) } yield Slice(s, i, n),
       for { s <- g; n = s.length; j <- c(0, n) } yield Slice(s, 0, j),
-      for { s <- g; n = s.length; i <- c(0, n); j <- c(i, n) } yield Slice(s, i, j))
+      for { s <- g; n = s.length; i <- c(0, n); j <- c(i, n) } yield
+        Slice(s, i, j)
+    )
   }
 
   implicit val arbitrarySlice: Arbitrary[Slice] =
@@ -37,17 +39,13 @@ class SliceCheck extends PropSpec with Matchers with PropertyChecks {
 
   property("Slice(s, i, j) ~ s.substring(i, j)") {
     forAll { (s: String, i: Int, j: Int) =>
-      tryEqual(
-        Slice(s, i, j).toString,
-        s.substring(i, j))
+      tryEqual(Slice(s, i, j).toString, s.substring(i, j))
     }
   }
 
   property("Slice(s, i, j).charAt(k) ~ s.substring(i, j).charAt(k)") {
     forAll { (s: String, i: Int, j: Int, k: Int) =>
-      tryEqual(
-        Slice(s, i, j).charAt(k),
-        s.substring(i, j).charAt(k))
+      tryEqual(Slice(s, i, j).charAt(k), s.substring(i, j).charAt(k))
     }
   }
 
@@ -59,25 +57,21 @@ class SliceCheck extends PropSpec with Matchers with PropertyChecks {
 
   property("slice.charAt(i) ~ slice.toString.charAt(i)") {
     forAll { (cs: Slice, i: Int) =>
-      tryEqual(
-        cs.charAt(i),
-        cs.toString.charAt(i))
+      tryEqual(cs.charAt(i), cs.toString.charAt(i))
     }
   }
 
-  property("Slice(s, i, j).subSequence(k, l) ~ s.substring(i, j).substring(k, l)") {
+  property(
+    "Slice(s, i, j).subSequence(k, l) ~ s.substring(i, j).substring(k, l)") {
     forAll { (s: String, i: Int, j: Int, k: Int, l: Int) =>
-      tryEqual(
-        Slice(s, i, j).subSequence(k, l).toString,
-        s.substring(i, j).substring(k, l))
+      tryEqual(Slice(s, i, j).subSequence(k, l).toString,
+               s.substring(i, j).substring(k, l))
     }
   }
 
   property("Slice(s) ~ Slice(s, 0, s.length)") {
     forAll { (s: String) =>
-      tryEqual(
-        Slice(s).toString,
-        Slice(s, 0, s.length).toString)
+      tryEqual(Slice(s).toString, Slice(s, 0, s.length).toString)
     }
   }
 
@@ -91,7 +85,9 @@ class SliceCheck extends PropSpec with Matchers with PropertyChecks {
   }
 
   property("x == x") {
-    forAll { (x: Slice) => x shouldBe x }
+    forAll { (x: Slice) =>
+      x shouldBe x
+    }
   }
 
   property("(x == y) = (x.toString == y.toString)") {

@@ -11,20 +11,19 @@ object ArbitraryUtil {
   def isFinite(n: Double): Boolean =
     !java.lang.Double.isNaN(n) && !java.lang.Double.isInfinite(n)
 
-  val jnull    = Gen.const(JNull)
+  val jnull = Gen.const(JNull)
   val jboolean = Gen.oneOf(JTrue :: JFalse :: Nil)
-  val jlong    = arbitrary[Long].map(LongNum(_))
-  val jdouble  = arbitrary[Double].filter(isFinite).map(DoubleNum(_))
-  val jstring  = arbitrary[String].map(JString(_))
+  val jlong = arbitrary[Long].map(LongNum(_))
+  val jdouble = arbitrary[Double].filter(isFinite).map(DoubleNum(_))
+  val jstring = arbitrary[String].map(JString(_))
 
   // Totally unscientific atom frequencies.
   val jatom: Gen[JAtom] =
-    Gen.frequency(
-      (1, jnull),
-      (8, jboolean),
-      (8, jlong),
-      (8, jdouble),
-      (16, jstring))
+    Gen.frequency((1, jnull),
+                  (8, jboolean),
+                  (8, jlong),
+                  (8, jdouble),
+                  (16, jstring))
 
   // Use lvl to limit the depth of our jvalues.
   // Otherwise we will end up with SOE real fast.
@@ -38,7 +37,9 @@ object ArbitraryUtil {
     for { s <- arbitrary[String]; j <- jvalue(lvl) } yield (s, j)
 
   def jobject(lvl: Int): Gen[JObject] =
-    Gen.containerOf[Vector, (String, JValue)](jitem(lvl + 1)).map(JObject.fromSeq)
+    Gen
+      .containerOf[Vector, (String, JValue)](jitem(lvl + 1))
+      .map(JObject.fromSeq)
 
   def jvalue(lvl: Int = 0): Gen[JValue] =
     if (lvl >= MaxLevel) jatom

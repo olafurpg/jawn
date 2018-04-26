@@ -26,9 +26,10 @@ trait MutableFacade[J] extends Facade[J] {
     var key: String = null
     val vs = mutable.Map.empty[String, J]
     def add(s: CharSequence): Unit =
-      if (key == null) { key = s.toString } else { vs(key) = jstring(s); key = null }
-    def add(v: J): Unit =
-      { vs(key) = v; key = null }
+      if (key == null) { key = s.toString } else {
+        vs(key) = jstring(s); key = null
+      }
+    def add(v: J): Unit = { vs(key) = v; key = null }
     def finish = jobject(vs)
     def isObj = true
   }

@@ -6,7 +6,8 @@ import org.json4s.JsonAST._
 
 object Parser extends Parser(false, false)
 
-class Parser(useBigDecimalForDouble: Boolean, useBigIntForLong: Boolean) extends SupportParser[JValue] {
+class Parser(useBigDecimalForDouble: Boolean, useBigIntForLong: Boolean)
+    extends SupportParser[JValue] {
 
   implicit val facade: RawFacade[JValue] =
     new Facade[JValue] {
@@ -50,8 +51,7 @@ class Parser(useBigDecimalForDouble: Boolean, useBigIntForLong: Boolean) extends
           def add(s: CharSequence): Unit =
             if (key == null) key = s.toString
             else { vs += JField(key, jstring(s)); key = null }
-          def add(v: JValue): Unit =
-            { vs += JField(key, v); key = null }
+          def add(v: JValue): Unit = { vs += JField(key, v); key = null }
           def finish: JValue = JObject(vs.toList)
           def isObj: Boolean = true
         }

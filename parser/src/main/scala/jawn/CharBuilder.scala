@@ -1,11 +1,11 @@
 package jawn
 
 /**
- * CharBuilder is a specialized way to build Strings.
- *
- * It wraps a (growable) array of characters, and can accept
- * additional String or Char data to be added to its buffer.
- */
+  * CharBuilder is a specialized way to build Strings.
+  *
+  * It wraps a (growable) array of characters, and can accept
+  * additional String or Char data to be added to its buffer.
+  */
 private[jawn] final class CharBuilder {
   @inline final def INITIALSIZE = 32
 

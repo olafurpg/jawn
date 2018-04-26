@@ -1,6 +1,6 @@
 package jawn
 
-import java.lang.Integer.{ bitCount, highestOneBit }
+import java.lang.Integer.{bitCount, highestOneBit}
 import java.io.{File, FileInputStream}
 import java.nio.ByteBuffer
 import java.nio.channels.ReadableByteChannel
@@ -21,16 +21,17 @@ object ChannelParser {
       new ChannelParser[J](new FileInputStream(f).getChannel, bufferSize)
     }
 
-  def fromChannel[J](ch: ReadableByteChannel, bufferSize: Int = DefaultBufferSize): ChannelParser[J] =
+  def fromChannel[J](ch: ReadableByteChannel,
+                     bufferSize: Int = DefaultBufferSize): ChannelParser[J] =
     new ChannelParser[J](ch, bufferSize)
 
   /**
-   * Given a desired buffer size, find the closest positive
-   * power-of-two larger than that size.
-   *
-   * This method throws an exception if the given values are negative
-   * or too large to have a valid power of two.
-   */
+    * Given a desired buffer size, find the closest positive
+    * power-of-two larger than that size.
+    *
+    * This method throws an exception if the given values are negative
+    * or too large to have a valid power of two.
+    */
   def computeBufferSize(x: Int): Int =
     if (x < 0) {
       throw new IllegalArgumentException("negative bufferSize ($x)")
@@ -44,12 +45,14 @@ object ChannelParser {
 }
 
 /**
- * Basic file parser.
- *
- * Given a file name this parser opens it, chunks the data, and parses
- * it.
- */
-final class ChannelParser[J](ch: ReadableByteChannel, bufferSize: Int) extends SyncParser[J] with ByteBasedParser[J] {
+  * Basic file parser.
+  *
+  * Given a file name this parser opens it, chunks the data, and parses
+  * it.
+  */
+final class ChannelParser[J](ch: ReadableByteChannel, bufferSize: Int)
+    extends SyncParser[J]
+    with ByteBasedParser[J] {
 
   var Bufsize: Int = ChannelParser.computeBufferSize(bufferSize)
   var Mask: Int = Bufsize - 1
@@ -71,12 +74,12 @@ final class ChannelParser[J](ch: ReadableByteChannel, bufferSize: Int) extends S
   protected[this] final def close(): Unit = ch.close()
 
   /**
-   * Swap the curr and next arrays/buffers/counts.
-   *
-   * We'll call this in response to certain reset() calls. Specifically, when
-   * the index provided to reset is no longer in the 'curr' buffer, we want to
-   * clear that data and swap the buffers.
-   */
+    * Swap the curr and next arrays/buffers/counts.
+    *
+    * We'll call this in response to certain reset() calls. Specifically, when
+    * the index provided to reset is no longer in the 'curr' buffer, we want to
+    * clear that data and swap the buffers.
+    */
   protected[this] final def swap(): Unit = {
     var tmp = curr; curr = next; next = tmp
     var ntmp = ncurr; ncurr = nnext; nnext = ntmp
@@ -98,10 +101,10 @@ final class ChannelParser[J](ch: ReadableByteChannel, bufferSize: Int) extends S
   }
 
   /**
-   * If the cursor 'i' is past the 'curr' buffer, we want to clear the
-   * current byte buffer, do a swap, load some more data, and
-   * continue.
-   */
+    * If the cursor 'i' is past the 'curr' buffer, we want to clear the
+    * current byte buffer, do a swap, load some more data, and
+    * continue.
+    */
   protected[this] final def reset(i: Int): Int =
     if (i >= Bufsize) {
       swap()
@@ -112,34 +115,36 @@ final class ChannelParser[J](ch: ReadableByteChannel, bufferSize: Int) extends S
       i
     }
 
-  protected[this] final def checkpoint(state: Int, i: Int, stack: List[RawFContext[J]]): Unit = ()
+  protected[this] final def checkpoint(state: Int,
+                                       i: Int,
+                                       stack: List[RawFContext[J]]): Unit = ()
 
   /**
-   * This is a specialized accessor for the case where our underlying
-   * data are bytes not chars.
-   */
+    * This is a specialized accessor for the case where our underlying
+    * data are bytes not chars.
+    */
   protected[this] final def byte(i: Int): Byte =
     if (i < Bufsize) curr(i)
     else if (i < Allsize) next(i & Mask)
     else { grow(); byte(i) }
 
   /**
-   * Reads a byte as a single Char. The byte must be valid ASCII (this
-   * method is used to parse JSON values like numbers, constants, or
-   * delimiters, which are known to be within ASCII).
-   */
+    * Reads a byte as a single Char. The byte must be valid ASCII (this
+    * method is used to parse JSON values like numbers, constants, or
+    * delimiters, which are known to be within ASCII).
+    */
   protected[this] final def at(i: Int): Char =
     if (i < Bufsize) curr(i).toChar
     else if (i < Allsize) next(i & Mask).toChar
     else { grow(); at(i) }
 
   /**
-   * Access a byte range as a string.
-   *
-   * Since the underlying data are UTF-8 encoded, i and k must occur
-   * on unicode boundaries. Also, the resulting String is not
-   * guaranteed to have length (k - i).
-   */
+    * Access a byte range as a string.
+    *
+    * Since the underlying data are UTF-8 encoded, i and k must occur
+    * on unicode boundaries. Also, the resulting String is not
+    * guaranteed to have length (k - i).
+    */
   protected[this] final def at(i: Int, k: Int): CharSequence = {
     val len = k - i
     if (k > Allsize) {

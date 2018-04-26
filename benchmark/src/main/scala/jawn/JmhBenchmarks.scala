@@ -53,7 +53,8 @@ trait OtherBenchmarks { self: JmhBenchmarks =>
 
   @Benchmark
   def rojomaV3Parse() =
-    com.rojoma.json.v3.io.JsonReader.fromReader(reader(path), blockSize = 100000)
+    com.rojoma.json.v3.io.JsonReader
+      .fromReader(reader(path), blockSize = 100000)
 
   @Benchmark
   def argonautParse() =
@@ -108,7 +109,9 @@ trait OtherBenchmarks { self: JmhBenchmarks =>
 
 class Qux2Bench extends JmhBenchmarks("qux2.json") with OtherBenchmarks
 class Bla25Bench extends JmhBenchmarks("bla25.json") with OtherBenchmarks
-class CountriesBench extends JmhBenchmarks("countries.geo.json") with OtherBenchmarks
+class CountriesBench
+    extends JmhBenchmarks("countries.geo.json")
+    with OtherBenchmarks
 class Ugh10kBench extends JmhBenchmarks("ugh10k.json") with OtherBenchmarks
 
 class JawnOnlyQux2Bench extends JmhBenchmarks("qux2.json")

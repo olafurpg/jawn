@@ -7,75 +7,78 @@ import java.nio.charset.Charset
 import scala.annotation.{switch, tailrec}
 import scala.util.Try
 
-case class ParseException(msg: String, index: Int, line: Int, col: Int) extends Exception(msg)
+case class ParseException(msg: String, index: Int, line: Int, col: Int)
+    extends Exception(msg)
 
 case class IncompleteParseException(msg: String) extends Exception(msg)
 
 /**
- * Parser implements a state machine for correctly parsing JSON data.
- *
- * The trait relies on a small number of methods which are left
- * abstract, and which generalize parsing based on whether the input
- * is in Bytes or Chars, coming from Strings, files, or other input.
- * All methods provided here are protected, so different parsers can
- * choose which functionality to expose.
- *
- * Parser is parameterized on J, which is the type of the JSON AST it
- * will return. Jawn can produce any AST for which a Facade[J] is
- * available.
- *
- * The parser trait does not hold any state itself, but particular
- * implementations will usually hold state. Parser instances should
- * not be reused between parsing runs.
- *
- * For now the parser requires input to be in UTF-8. This requirement
- * may eventually be relaxed.
- */
+  * Parser implements a state machine for correctly parsing JSON data.
+  *
+  * The trait relies on a small number of methods which are left
+  * abstract, and which generalize parsing based on whether the input
+  * is in Bytes or Chars, coming from Strings, files, or other input.
+  * All methods provided here are protected, so different parsers can
+  * choose which functionality to expose.
+  *
+  * Parser is parameterized on J, which is the type of the JSON AST it
+  * will return. Jawn can produce any AST for which a Facade[J] is
+  * available.
+  *
+  * The parser trait does not hold any state itself, but particular
+  * implementations will usually hold state. Parser instances should
+  * not be reused between parsing runs.
+  *
+  * For now the parser requires input to be in UTF-8. This requirement
+  * may eventually be relaxed.
+  */
 abstract class Parser[J] {
 
   protected[this] final val utf8 = Charset.forName("UTF-8")
 
   /**
-   * Read the byte/char at 'i' as a Char.
-   *
-   * Note that this should not be used on potential multi-byte
-   * sequences.
-   */
+    * Read the byte/char at 'i' as a Char.
+    *
+    * Note that this should not be used on potential multi-byte
+    * sequences.
+    */
   protected[this] def at(i: Int): Char
 
   /**
-   * Read the bytes/chars from 'i' until 'j' as a String.
-   */
+    * Read the bytes/chars from 'i' until 'j' as a String.
+    */
   protected[this] def at(i: Int, j: Int): CharSequence
 
   /**
-   * Return true iff 'i' is at or beyond the end of the input (EOF).
-   */
+    * Return true iff 'i' is at or beyond the end of the input (EOF).
+    */
   protected[this] def atEof(i: Int): Boolean
 
   /**
-   * The reset() method is used to signal that we're working from the
-   * given position, and any previous data can be released. Some
-   * parsers (e.g.  StringParser) will ignore release, while others
-   * (e.g. PathParser) will need to use this information to release
-   * and allocate different areas.
-   */
+    * The reset() method is used to signal that we're working from the
+    * given position, and any previous data can be released. Some
+    * parsers (e.g.  StringParser) will ignore release, while others
+    * (e.g. PathParser) will need to use this information to release
+    * and allocate different areas.
+    */
   protected[this] def reset(i: Int): Int
 
   /**
-   * The checkpoint() method is used to allow some parsers to store
-   * their progress.
-   */
-  protected[this] def checkpoint(state: Int, i: Int, stack: List[RawFContext[J]]): Unit
+    * The checkpoint() method is used to allow some parsers to store
+    * their progress.
+    */
+  protected[this] def checkpoint(state: Int,
+                                 i: Int,
+                                 stack: List[RawFContext[J]]): Unit
 
   /**
-   * Should be called when parsing is finished.
-   */
+    * Should be called when parsing is finished.
+    */
   protected[this] def close(): Unit
 
   /**
-   * Valid parser states.
-   */
+    * Valid parser states.
+    */
   @inline protected[this] final val ARRBEG = 6
   @inline protected[this] final val OBJBEG = 7
   @inline protected[this] final val DATA = 1
@@ -98,8 +101,8 @@ abstract class Parser[J] {
   }
 
   /**
-   * Used to generate error messages with character info and offsets.
-   */
+    * Used to generate error messages with character info and offsets.
+    */
   protected[this] def die(i: Int, msg: String): Nothing = {
     val y = line() + 1
     val x = column(i) + 1
@@ -108,25 +111,26 @@ abstract class Parser[J] {
   }
 
   /**
-   * Used to generate messages for internal errors.
-   *
-   * This should only be used in situations where a possible bug in
-   * the parser was detected. For errors in user-provided JSON, use
-   * die().
-   */
+    * Used to generate messages for internal errors.
+    *
+    * This should only be used in situations where a possible bug in
+    * the parser was detected. For errors in user-provided JSON, use
+    * die().
+    */
   protected[this] def error(msg: String) =
     sys.error(msg)
 
   /**
-   * Parse the given number, and add it to the given context.
-   *
-   * We don't actually instantiate a number here, but rather pass the
-   * string of for future use. Facades can choose to be lazy and just
-   * store the string. This ends up being way faster and has the nice
-   * side-effect that we know exactly how the user represented the
-   * number.
-   */
-  protected[this] final def parseNum(i: Int, ctxt: RawFContext[J])(implicit facade: RawFacade[J]): Int = {
+    * Parse the given number, and add it to the given context.
+    *
+    * We don't actually instantiate a number here, but rather pass the
+    * string of for future use. Facades can choose to be lazy and just
+    * store the string. This ends up being way faster and has the nice
+    * side-effect that we know exactly how the user represented the
+    * number.
+    */
+  protected[this] final def parseNum(i: Int, ctxt: RawFContext[J])(
+      implicit facade: RawFacade[J]): Int = {
     var j = i
     var c = at(j)
     var decIndex = -1
@@ -176,20 +180,21 @@ abstract class Parser[J] {
   }
 
   /**
-   * Parse the given number, and add it to the given context.
-   *
-   * This method is a bit slower than parseNum() because it has to be
-   * sure it doesn't run off the end of the input.
-   *
-   * Normally (when operating in rparse in the context of an outer
-   * array or object) we don't need to worry about this and can just
-   * grab characters, because if we run out of characters that would
-   * indicate bad input. This is for cases where the number could
-   * possibly be followed by a valid EOF.
-   *
-   * This method has all the same caveats as the previous method.
-   */
-  protected[this] final def parseNumSlow(i: Int, ctxt: RawFContext[J])(implicit facade: RawFacade[J]): Int = {
+    * Parse the given number, and add it to the given context.
+    *
+    * This method is a bit slower than parseNum() because it has to be
+    * sure it doesn't run off the end of the input.
+    *
+    * Normally (when operating in rparse in the context of an outer
+    * array or object) we don't need to worry about this and can just
+    * grab characters, because if we run out of characters that would
+    * indicate bad input. This is for cases where the number could
+    * possibly be followed by a valid EOF.
+    *
+    * This method has all the same caveats as the previous method.
+    */
+  protected[this] final def parseNumSlow(i: Int, ctxt: RawFContext[J])(
+      implicit facade: RawFacade[J]): Int = {
     var j = i
     var c = at(j)
     var decIndex = -1
@@ -267,11 +272,11 @@ abstract class Parser[J] {
   }
 
   /**
-   * Generate a Char from the hex digits of "\u1234" (i.e. "1234").
-   *
-   * NOTE: This is only capable of generating characters from the basic plane.
-   * This is why it can only return Char instead of Int.
-   */
+    * Generate a Char from the hex digits of "\u1234" (i.e. "1234").
+    *
+    * NOTE: This is only capable of generating characters from the basic plane.
+    * This is why it can only return Char instead of Int.
+    */
   protected[this] final def descape(s: CharSequence): Char = {
     val hc = HexChars
     var i = 0
@@ -284,16 +289,17 @@ abstract class Parser[J] {
   }
 
   /**
-   * Parse the JSON string starting at 'i' and save it into 'ctxt'.
-   */
+    * Parse the JSON string starting at 'i' and save it into 'ctxt'.
+    */
   protected[this] def parseString(i: Int, ctxt: RawFContext[J]): Int
 
   /**
-   * Parse the JSON constant "true".
-   *
-   * Note that this method assumes that the first character has already been checked.
-   */
-  protected[this] final def parseTrue(i: Int)(implicit facade: RawFacade[J]): J =
+    * Parse the JSON constant "true".
+    *
+    * Note that this method assumes that the first character has already been checked.
+    */
+  protected[this] final def parseTrue(i: Int)(
+      implicit facade: RawFacade[J]): J =
     if (at(i + 1) == 'r' && at(i + 2) == 'u' && at(i + 3) == 'e') {
       facade.jtrue(i)
     } else {
@@ -301,11 +307,12 @@ abstract class Parser[J] {
     }
 
   /**
-   * Parse the JSON constant "false".
-   *
-   * Note that this method assumes that the first character has already been checked.
-   */
-  protected[this] final def parseFalse(i: Int)(implicit facade: RawFacade[J]): J =
+    * Parse the JSON constant "false".
+    *
+    * Note that this method assumes that the first character has already been checked.
+    */
+  protected[this] final def parseFalse(i: Int)(
+      implicit facade: RawFacade[J]): J =
     if (at(i + 1) == 'a' && at(i + 2) == 'l' && at(i + 3) == 's' && at(i + 4) == 'e') {
       facade.jfalse(i)
     } else {
@@ -313,11 +320,12 @@ abstract class Parser[J] {
     }
 
   /**
-   * Parse the JSON constant "null".
-   *
-   * Note that this method assumes that the first character has already been checked.
-   */
-  protected[this] final def parseNull(i: Int)(implicit facade: RawFacade[J]): J =
+    * Parse the JSON constant "null".
+    *
+    * Note that this method assumes that the first character has already been checked.
+    */
+  protected[this] final def parseNull(i: Int)(
+      implicit facade: RawFacade[J]): J =
     if (at(i + 1) == 'u' && at(i + 2) == 'l' && at(i + 3) == 'l') {
       facade.jnull(i)
     } else {
@@ -325,62 +333,67 @@ abstract class Parser[J] {
     }
 
   /**
-   * Parse and return the next JSON value and the position beyond it.
-   */
-  protected[this] final def parse(i: Int)(implicit facade: RawFacade[J]): (J, Int) = try {
-    (at(i): @switch) match {
-      // ignore whitespace
-      case ' ' => parse(i + 1)
-      case '\t' => parse(i + 1)
-      case '\r' => parse(i + 1)
-      case '\n' => newline(i); parse(i + 1)
+    * Parse and return the next JSON value and the position beyond it.
+    */
+  protected[this] final def parse(i: Int)(
+      implicit facade: RawFacade[J]): (J, Int) =
+    try {
+      (at(i): @switch) match {
+        // ignore whitespace
+        case ' '  => parse(i + 1)
+        case '\t' => parse(i + 1)
+        case '\r' => parse(i + 1)
+        case '\n' => newline(i); parse(i + 1)
 
-      // if we have a recursive top-level structure, we'll delegate the parsing
-      // duties to our good friend rparse().
-      case '[' => rparse(ARRBEG, i + 1, facade.arrayContext(i) :: Nil)
-      case '{' => rparse(OBJBEG, i + 1, facade.objectContext(i) :: Nil)
+        // if we have a recursive top-level structure, we'll delegate the parsing
+        // duties to our good friend rparse().
+        case '[' => rparse(ARRBEG, i + 1, facade.arrayContext(i) :: Nil)
+        case '{' => rparse(OBJBEG, i + 1, facade.objectContext(i) :: Nil)
 
-      // we have a single top-level number
-      case '-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' =>
-        val ctxt = facade.singleContext(i)
-        val j = parseNumSlow(i, ctxt)
-        (ctxt.finish(i), j)
+        // we have a single top-level number
+        case '-' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' =>
+          val ctxt = facade.singleContext(i)
+          val j = parseNumSlow(i, ctxt)
+          (ctxt.finish(i), j)
 
-      // we have a single top-level string
-      case '"' =>
-        val ctxt = facade.singleContext(i)
-        val j = parseString(i, ctxt)
-        (ctxt.finish(i), j)
+        // we have a single top-level string
+        case '"' =>
+          val ctxt = facade.singleContext(i)
+          val j = parseString(i, ctxt)
+          (ctxt.finish(i), j)
 
-      // we have a single top-level constant
-      case 't' => (parseTrue(i), i + 4)
-      case 'f' => (parseFalse(i), i + 5)
-      case 'n' => (parseNull(i), i + 4)
+        // we have a single top-level constant
+        case 't' => (parseTrue(i), i + 4)
+        case 'f' => (parseFalse(i), i + 5)
+        case 'n' => (parseNull(i), i + 4)
 
-      // invalid
-      case _ => die(i, "expected json value")
+        // invalid
+        case _ => die(i, "expected json value")
+      }
+    } catch {
+      case _: IndexOutOfBoundsException =>
+        throw IncompleteParseException("exhausted input")
     }
-  } catch {
-    case _: IndexOutOfBoundsException =>
-      throw IncompleteParseException("exhausted input")
-  }
 
   /**
-   * Tail-recursive parsing method to do the bulk of JSON parsing.
-   *
-   * This single method manages parser states, data, etc. Except for
-   * parsing non-recursive values (like strings, numbers, and
-   * constants) all important work happens in this loop (or in methods
-   * it calls, like reset()).
-   *
-   * Currently the code is optimized to make use of switch
-   * statements. Future work should consider whether this is better or
-   * worse than manually constructed if/else statements or something
-   * else. Also, it may be possible to reorder some cases for speed
-   * improvements.
-   */
+    * Tail-recursive parsing method to do the bulk of JSON parsing.
+    *
+    * This single method manages parser states, data, etc. Except for
+    * parsing non-recursive values (like strings, numbers, and
+    * constants) all important work happens in this loop (or in methods
+    * it calls, like reset()).
+    *
+    * Currently the code is optimized to make use of switch
+    * statements. Future work should consider whether this is better or
+    * worse than manually constructed if/else statements or something
+    * else. Also, it may be possible to reorder some cases for speed
+    * improvements.
+    */
   @tailrec
-  protected[this] final def rparse(state: Int, j: Int, stack: List[RawFContext[J]])(implicit facade: RawFacade[J]): (J, Int) = {
+  protected[this] final def rparse(
+      state: Int,
+      j: Int,
+      stack: List[RawFContext[J]])(implicit facade: RawFacade[J]): (J, Int) = {
     val i = reset(j)
     checkpoint(state, i, stack)
 
@@ -419,10 +432,8 @@ abstract class Parser[J] {
           die(i, "expected json value")
         }
       }
-    } else if (
-      (c == ']' && (state == ARREND || state == ARRBEG)) ||
-      (c == '}' && (state == OBJEND || state == OBJBEG))
-    ) {
+    } else if ((c == ']' && (state == ARREND || state == ARRBEG)) ||
+               (c == '}' && (state == OBJEND || state == OBJBEG))) {
       // we are inside an array or object and have seen a key or a closing
       // brace, respectively.
       if (stack.isEmpty) {
@@ -478,7 +489,6 @@ abstract class Parser[J] {
   }
 }
 
-
 object Parser {
 
   def parseUnsafe[J](s: String)(implicit facade: RawFacade[J]): J =
@@ -487,7 +497,8 @@ object Parser {
   def parseFromString[J](s: String)(implicit facade: RawFacade[J]): Try[J] =
     Try(new StringParser[J](s).parse)
 
-  def parseFromCharSequence[J](cs: CharSequence)(implicit facade: RawFacade[J]): Try[J] =
+  def parseFromCharSequence[J](cs: CharSequence)(
+      implicit facade: RawFacade[J]): Try[J] =
     Try(new CharSequenceParser[J](cs).parse)
 
   def parseFromPath[J](path: String)(implicit facade: RawFacade[J]): Try[J] =
@@ -496,12 +507,15 @@ object Parser {
   def parseFromFile[J](file: File)(implicit facade: RawFacade[J]): Try[J] =
     Try(ChannelParser.fromFile[J](file).parse)
 
-  def parseFromChannel[J](ch: ReadableByteChannel)(implicit facade: RawFacade[J]): Try[J] =
+  def parseFromChannel[J](ch: ReadableByteChannel)(
+      implicit facade: RawFacade[J]): Try[J] =
     Try(ChannelParser.fromChannel[J](ch).parse)
 
-  def parseFromByteBuffer[J](buf: ByteBuffer)(implicit facade: RawFacade[J]): Try[J] =
+  def parseFromByteBuffer[J](buf: ByteBuffer)(
+      implicit facade: RawFacade[J]): Try[J] =
     Try(new ByteBufferParser[J](buf).parse)
 
-  def async[J](mode: AsyncParser.Mode)(implicit facade: RawFacade[J]): AsyncParser[J] =
+  def async[J](mode: AsyncParser.Mode)(
+      implicit facade: RawFacade[J]): AsyncParser[J] =
     AsyncParser[J](mode)
 }

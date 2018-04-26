@@ -42,9 +42,10 @@ object JawnFacade extends Facade[JValue] {
       var key: String = null
       val vs = mutable.Map.empty[String, JValue]
       def add(s: CharSequence): Unit =
-        if (key == null) { key = s.toString } else { vs(key.toString) = JString(s.toString); key = null }
-      def add(v: JValue): Unit =
-        { vs(key) = v; key = null }
+        if (key == null) { key = s.toString } else {
+          vs(key.toString) = JString(s.toString); key = null
+        }
+      def add(v: JValue): Unit = { vs(key) = v; key = null }
       def finish = JObject(vs)
       def isObj = true
     }
