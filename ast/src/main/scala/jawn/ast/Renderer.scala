@@ -27,13 +27,16 @@ sealed trait Renderer {
     }
 
   def canonicalizeObject(
-      vs: mutable.Map[String, JValue]): Iterator[(String, JValue)]
+      vs: mutable.Map[String, JValue]
+  ): Iterator[(String, JValue)]
 
   def renderString(sb: StringBuilder, s: String): Unit
 
-  final def renderArray(sb: StringBuilder,
-                        depth: Int,
-                        vs: Array[JValue]): Unit = {
+  final def renderArray(
+      sb: StringBuilder,
+      depth: Int,
+      vs: Array[JValue]
+  ): Unit = {
     if (vs.isEmpty) return { sb.append("[]"); () }
     sb.append("[")
     render(sb, depth + 1, vs(0))
@@ -46,9 +49,11 @@ sealed trait Renderer {
     sb.append("]")
   }
 
-  final def renderObject(sb: StringBuilder,
-                         depth: Int,
-                         it: Iterator[(String, JValue)]): Unit = {
+  final def renderObject(
+      sb: StringBuilder,
+      depth: Int,
+      it: Iterator[(String, JValue)]
+  ): Unit = {
     if (!it.hasNext) return { sb.append("{}"); () }
     val (k0, v0) = it.next
     sb.append("{")
@@ -91,7 +96,8 @@ sealed trait Renderer {
 
 object CanonicalRenderer extends Renderer {
   def canonicalizeObject(
-      vs: mutable.Map[String, JValue]): Iterator[(String, JValue)] = {
+      vs: mutable.Map[String, JValue]
+  ): Iterator[(String, JValue)] = {
     val keys = vs.keys.toArray
     Sorting.quickSort(keys)
     keys.iterator.map(k => (k, vs(k)))
@@ -102,7 +108,8 @@ object CanonicalRenderer extends Renderer {
 
 object FastRenderer extends Renderer {
   def canonicalizeObject(
-      vs: mutable.Map[String, JValue]): Iterator[(String, JValue)] =
+      vs: mutable.Map[String, JValue]
+  ): Iterator[(String, JValue)] =
     vs.iterator
   def renderString(sb: StringBuilder, s: String): Unit =
     escape(sb, s, false)

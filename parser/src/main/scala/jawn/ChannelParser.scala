@@ -21,8 +21,10 @@ object ChannelParser {
       new ChannelParser[J](new FileInputStream(f).getChannel, bufferSize)
     }
 
-  def fromChannel[J](ch: ReadableByteChannel,
-                     bufferSize: Int = DefaultBufferSize): ChannelParser[J] =
+  def fromChannel[J](
+      ch: ReadableByteChannel,
+      bufferSize: Int = DefaultBufferSize
+  ): ChannelParser[J] =
     new ChannelParser[J](ch, bufferSize)
 
   /**
@@ -115,9 +117,11 @@ final class ChannelParser[J](ch: ReadableByteChannel, bufferSize: Int)
       i
     }
 
-  protected[this] final def checkpoint(state: Int,
-                                       i: Int,
-                                       stack: List[RawFContext[J]]): Unit = ()
+  protected[this] final def checkpoint(
+      state: Int,
+      i: Int,
+      stack: List[RawFContext[J]]
+  ): Unit = ()
 
   /**
     * This is a specialized accessor for the case where our underlying

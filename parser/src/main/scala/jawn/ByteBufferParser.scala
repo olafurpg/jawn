@@ -27,9 +27,11 @@ final class ByteBufferParser[J](src: ByteBuffer)
 
   protected[this] final def close() { src.position(src.limit) }
   protected[this] final def reset(i: Int): Int = i
-  protected[this] final def checkpoint(state: Int,
-                                       i: Int,
-                                       stack: List[RawFContext[J]]) {}
+  protected[this] final def checkpoint(
+      state: Int,
+      i: Int,
+      stack: List[RawFContext[J]]
+  ) {}
   protected[this] final def byte(i: Int): Byte = src.get(i + start)
   protected[this] final def at(i: Int): Char = src.get(i + start).toChar
 

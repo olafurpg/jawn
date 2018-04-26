@@ -22,8 +22,10 @@ trait CharBasedParser[J] extends Parser[J] {
     * This method expects the data to be in UTF-16 and accesses it as
     * chars.
     */
-  protected[this] final def parseStringSimple(i: Int,
-                                              ctxt: RawFContext[J]): Int = {
+  protected[this] final def parseStringSimple(
+      i: Int,
+      ctxt: RawFContext[J]
+  ): Int = {
     var j = i
     var c = at(j)
     while (c != '"') {
@@ -38,8 +40,10 @@ trait CharBasedParser[J] extends Parser[J] {
   /**
     * Parse a string that is known to have escape sequences.
     */
-  protected[this] final def parseStringComplex(i: Int,
-                                               ctxt: RawFContext[J]): Int = {
+  protected[this] final def parseStringComplex(
+      i: Int,
+      ctxt: RawFContext[J]
+  ): Int = {
     var j = i + 1
     val sb = charBuilder.reset()
 

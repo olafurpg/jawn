@@ -19,11 +19,13 @@ object ArbitraryUtil {
 
   // Totally unscientific atom frequencies.
   val jatom: Gen[JAtom] =
-    Gen.frequency((1, jnull),
-                  (8, jboolean),
-                  (8, jlong),
-                  (8, jdouble),
-                  (16, jstring))
+    Gen.frequency(
+      (1, jnull),
+      (8, jboolean),
+      (8, jlong),
+      (8, jdouble),
+      (16, jstring)
+    )
 
   // Use lvl to limit the depth of our jvalues.
   // Otherwise we will end up with SOE real fast.

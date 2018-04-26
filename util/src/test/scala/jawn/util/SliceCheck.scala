@@ -62,10 +62,13 @@ class SliceCheck extends PropSpec with Matchers with PropertyChecks {
   }
 
   property(
-    "Slice(s, i, j).subSequence(k, l) ~ s.substring(i, j).substring(k, l)") {
+    "Slice(s, i, j).subSequence(k, l) ~ s.substring(i, j).substring(k, l)"
+  ) {
     forAll { (s: String, i: Int, j: Int, k: Int, l: Int) =>
-      tryEqual(Slice(s, i, j).subSequence(k, l).toString,
-               s.substring(i, j).substring(k, l))
+      tryEqual(
+        Slice(s, i, j).subSequence(k, l).toString,
+        s.substring(i, j).substring(k, l)
+      )
     }
   }
 

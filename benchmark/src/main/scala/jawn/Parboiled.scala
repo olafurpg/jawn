@@ -35,7 +35,8 @@ class ParboiledParser(val input: ParserInput)
 
   def JsonObject: Rule1[JsObject] = rule {
     ws('{') ~ zeroOrMore(Pair).separatedBy(ws(',')) ~ ws('}') ~> (
-        (fields: Seq[JsField]) => JsObject(fields: _*))
+        (fields: Seq[JsField]) => JsObject(fields: _*)
+    )
   }
 
   def Pair = rule { JsonStringUnwrapped ~ ws(':') ~ Value ~> ((_, _)) }
@@ -71,7 +72,8 @@ class ParboiledParser(val input: ParserInput)
 
   def JsonArray = rule {
     ws('[') ~ zeroOrMore(Value).separatedBy(ws(',')) ~ ws(']') ~> (JsArray(
-      _: _*))
+      _: _*
+    ))
   }
 
   def Characters = rule { zeroOrMore(NormalChar | '\\' ~ EscapedChar) }

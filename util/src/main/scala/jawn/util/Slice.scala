@@ -89,7 +89,8 @@ object Slice {
   def apply(s: String, start: Int, limit: Int): Slice =
     if (start < 0 || limit < start || s.length < limit) {
       throw new IndexOutOfBoundsException(
-        s"invalid slice: start=$start, limit=$limit, length=${s.length}")
+        s"invalid slice: start=$start, limit=$limit, length=${s.length}"
+      )
     } else {
       new Slice(s, start, limit)
     }

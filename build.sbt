@@ -18,7 +18,8 @@ lazy val jawnSettings = Seq(
   //crossScalaVersions := allCrossVersions,
   crossScalaVersions := stableCrossVersions,
   mimaPreviousArtifacts := Set(
-    organization.value %% moduleName.value % previousJawnVersion),
+    organization.value %% moduleName.value % previousJawnVersion
+  ),
   resolvers += Resolver.sonatypeRepo("releases"),
   libraryDependencies += {
     CrossVersion.partialVersion(scalaVersion.value) match {
@@ -63,7 +64,8 @@ lazy val jawnSettings = Seq(
     ScmInfo(
       browseUrl = url("https://github.com/non/jawn"),
       connection = "scm:git:git@github.com:non/jawn.git"
-    )),
+    )
+  ),
   developers += Developer(
     name = "Erik Osheim",
     email = "erik@plastic-idolatry.com",
@@ -86,10 +88,12 @@ lazy val jawnSettings = Seq(
   )
 )
 
-lazy val noPublish = Seq(publish := {},
-                         publishLocal := {},
-                         publishArtifact := false,
-                         mimaPreviousArtifacts := Set())
+lazy val noPublish = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false,
+  mimaPreviousArtifacts := Set()
+)
 
 lazy val root = project
   .in(file("."))
@@ -176,12 +180,14 @@ lazy val benchmark = project
   .enablePlugins(JmhPlugin)
 
 lazy val all =
-  Seq(parser,
-      util,
-      ast,
-      supportArgonaut,
-      supportJson4s,
-      supportPlay,
-      supportRojoma,
-      supportRojomaV3,
-      supportSpray)
+  Seq(
+    parser,
+    util,
+    ast,
+    supportArgonaut,
+    supportJson4s,
+    supportPlay,
+    supportRojoma,
+    supportRojomaV3,
+    supportSpray
+  )

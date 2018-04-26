@@ -83,8 +83,10 @@ class AstCheck extends PropSpec with Matchers with PropertyChecks {
       json :: Nil
     }
 
-  def parseSegments(p: AsyncParser[JValue],
-                    segments: List[String]): Seq[JValue] =
+  def parseSegments(
+      p: AsyncParser[JValue],
+      segments: List[String]
+  ): Seq[JValue] =
     segments.foldLeft(List.empty[JValue]) { (rs, s) =>
       rs ++ checkRight(p.absorb(s))
     } ++ checkRight(p.finish())
@@ -122,7 +124,8 @@ class AstCheck extends PropSpec with Matchers with PropertyChecks {
   property("unicode string round-trip") {
     forAll { (s: String) =>
       JParser.parseFromString(JString(s).render(FastRenderer)) shouldBe Success(
-        JString(s))
+        JString(s)
+      )
     }
   }
 
